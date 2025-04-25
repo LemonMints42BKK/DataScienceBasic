@@ -1,10 +1,20 @@
 #!/bin/bash
 
-DB_PATH="../subject/customer"
+CSV_FOLDER="${2:-./subject/customer}"
 DB_USR="pnopjira"
 DB_NAME="piscineds"
 DB_HOST="localhost"
-DB_PW="mysecretpassword"
+
+get_container_id() {
+    # Get the container ID of the PostgreSQL container (assuming it's named something like 'postgres')
+    postgres_container_id=$(docker ps -q --filter "name=postgres_container")
+    # Check if the container exists
+    if [ -z "$postgres_container_id" ]; then
+        echo " ❌ PostgreSQL container is not running."
+        exit 1
+    fi
+    echo "✅ PostgreSQL container ID is $postgres_container_id"
+}
 
 #Import data
 import_data_csv() {
@@ -18,11 +28,9 @@ import_data_csv() {
     PGPASSWORD="$DB_PW" psql -U "$DB_USR" -d "$DB_NAME" -h "$DB_HOST" -c "\copy $1 FROM $2 DELIMITER ',' CSV HEADER"
 }
 
-#chack file name exiting
-for csv_file in "$DB_PATH"/*.csv; do
-    file_name=$(basename "$csv_file" .csv | tr '-' '_' | tr '[:upper:]' '[:lower:]')
-    echo "Chack extites $file_name table"
-    table_name=$(PGPASSWORD="$DB_PW" psql -U "$DB_USR" -d "$DB_NAME" -h "$DB_HOST" -Atc "SELECT to_regclass('$file_name');")
+#loop all CSV files in folder
+for csv_file in "$CSV_FOLDER"/*.csv; do
+   
     if [ {$file_name} = {$table_name} ]; then
         echo "✅ Table '$file_name' exists!"
         #import data

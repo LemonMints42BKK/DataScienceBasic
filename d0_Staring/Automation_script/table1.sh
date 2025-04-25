@@ -3,20 +3,10 @@
 DB_USER="pnopjira"
 DB_NAME="piscineds"
 DB_HOST="localhost"
+CONTAINER_NAME="postgres_container"
 CSV_FOLDER="${2:-./subject/customer}"
 TABLE_NAME="$1"
 CREATE_TABLE_STATUS=1
-
-get_container_id() {
-    # Get the container ID of the PostgreSQL container (assuming it's named something like 'postgres')
-    postgres_container_id=$(docker ps -q --filter "name=postgres_container")
-    # Check if the container exists
-    if [ -z "$postgres_container_id" ]; then
-        echo " ❌ PostgreSQL container is not running."
-        exit 1
-    fi
-    echo "✅ PostgreSQL container ID is $postgres_container_id"
-}
 
 is_valid_csv_name() {
     # The CSV’s name, without the file extension
@@ -28,22 +18,13 @@ is_valid_csv_name() {
     return 0
 }
 
-get_container_id
-
 for  file_path in "$CSV_FOLDER"/*.csv; do
-    # if is_valid_csv_name "$file_path"; then
-    #     echo "✅ CSV is valid"
-    #     CREATE_TABLE_STATUS=0
-    # else
-    #     echo "❌ CSV is invalid"
-    # fi
-
     if is_valid_csv_name "$file_path"; then
-        table_exists=$(docker exec -i "$postgres_container_id" psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -tAc "SELECT to_regclass('$TABLE_NAME');")
+        table_exists=$(docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -tAc "SELECT to_regclass('$TABLE_NAME');")
         echo "DEBUG: table_exists='$table_exists'"
         # Check DB table is already exists
         if [[ -z "$table_exists" || "$table_exists" == "null" ]]; then
-            docker exec -i "$postgres_container_id" psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -c \
+            docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -c \
                 "CREATE TABLE \"$TABLE_NAME\" (
                 event_time TIMESTAMPTZ NOT NULL,
                 event_type TEXT,
@@ -63,4 +44,5 @@ done
 if [ $CREATE_TABLE_STATUS -eq 1 ]; then
     echo " ❌ Table name's $TABLE_NAME doesn't match with the CSV’s name "
 	echo -e " ❌ OR The CSV folder path $CSV_FOLDER is incurrect\n"
+    return 1
 fi 

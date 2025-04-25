@@ -14,12 +14,15 @@ import_data_csv() {
     row_count=$(docker exec -i "$CONTAINER_NAME" psql -U "$DB_USR" -d "$DB_NAME" -h "$DB_HOST" -Atc \
     "SELECT COUNT(*) FROM $table_name;")
     echo "DEBUG: $row_count , $table_name, $CSV_FOLDER"
-    # if [ $row_count -gt 0 ]; then
-    #     docker exec -i "$CONTAINER_NAME" psql -U "$DB_USR" -d "$DB_NAME" -h "$DB_HOST" -c "DROP TABLE $1;"
-    #     ./table1.sh "$1" "$CSV_FOLDER"
-    #     import_data_csv "$1"
-    # fi
-    docker exec -i "$CONTAINER_NAME" psql -U "$DB_USR" -d "$DB_NAME" -h "$DB_HOST" -c "\copy $table_name FROM '$CSV_FOLDER' DELIMITER ',' CSV HEADER"
+
+    if [ $row_count -gt 0 ]; then
+        docker exec -i "$CONTAINER_NAME" psql -U "$DB_USR" -d "$DB_NAME" -h "$DB_HOST" -c "DROP TABLE $table_name;"
+        ./table1.sh "$table_name" "$CSV_FOLDER"
+        import_data_csv "$table_name"
+    fi
+    cat "$CSV_FOLDER/$table_name.csv" | docker exec -i "$CONTAINER_NAME" \
+    psql -U "$DB_USR" -d "$DB_NAME" -h "$DB_HOST" \
+    -c "COPY $table_name FROM STDIN WITH CSV HEADER DELIMITER ',';"
     return 0
 }
 
@@ -35,11 +38,13 @@ for csv_path in "$CSV_FOLDER"/*.csv; do
         continue
     fi
     # Import date to table
+    echo "START"
     import_data_csv "$table_name"
+    echo "END"
     #check import status
-    # if [ $? = 0 ]; then
-    #     echo -e  "✅ Import Data Sucessful!\n"
-    # else
-    #     echo -e "❌ Import Data Failure!\n"
-    # fi
+    if [ $? = 0 ]; then
+        echo -e  "✅ Import Data Sucessful!\n"
+    else
+        echo -e "❌ Import Data Failure!\n"
+    fi
 done

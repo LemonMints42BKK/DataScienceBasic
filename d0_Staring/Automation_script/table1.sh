@@ -4,7 +4,8 @@ DB_USER="pnopjira"
 DB_NAME="piscineds"
 DB_HOST="localhost"
 CONTAINER_NAME="postgres_container"
-CSV_FOLDER="${2:-./subject/customer}"
+
+CSV_FOLDER="${2:-./subject/customer/}"
 TABLE_NAME="$1"
 CREATE_TABLE_STATUS=1
 
@@ -21,7 +22,6 @@ is_valid_csv_name() {
 for  file_path in "$CSV_FOLDER"/*.csv; do
     if is_valid_csv_name "$file_path"; then
         table_exists=$(docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -tAc "SELECT to_regclass('$TABLE_NAME');")
-        echo "DEBUG: table_exists='$table_exists'"
         # Check DB table is already exists
         if [[ -z "$table_exists" || "$table_exists" == "null" ]]; then
             docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" -c \
@@ -45,4 +45,4 @@ if [ $CREATE_TABLE_STATUS -eq 1 ]; then
     echo " ❌ Table name's $TABLE_NAME doesn't match with the CSV’s name "
 	echo -e " ❌ OR The CSV folder path $CSV_FOLDER is incurrect\n"
     return 1
-fi 
+fi

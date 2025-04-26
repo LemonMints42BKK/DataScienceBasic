@@ -1,5 +1,4 @@
-version: '3.9'
-
+# version: '3.8'
 services:
 
   postgresDB:
@@ -12,7 +11,11 @@ services:
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_DB: piscineds
     volumes:
+      - ./scripts:/scripts
+      - ./subject:/data/subject
       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
     networks:
       - internal
   
@@ -28,6 +31,8 @@ services:
       - internal
 
 volumes:
+  scripts:
+  subject:
   postgres-data:
 
 networks:

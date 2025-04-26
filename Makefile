@@ -14,7 +14,7 @@ build:
 
 # Start the services in detached mode
 up:
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) $ up -d
 
 # Stop and remove the containers
 down:

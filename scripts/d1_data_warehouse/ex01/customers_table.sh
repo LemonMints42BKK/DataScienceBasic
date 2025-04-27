@@ -17,8 +17,7 @@ $$ LANGUAGE plpgsql;
 DO
 $$
 DECLARE
-    tbl1 RECORD;
-    tbl2 RECORD;
+    tbl RECORD;
     first_table_name TEXT;
     customers_created BOOLEAN := false;
 BEGIN
@@ -34,9 +33,22 @@ BEGIN
         RAISE NOTICE 'Creating customers table';
         customers_created := true;
     END IF;
+    -- Find all tables thatmatch pattern data_202*_*
+    RAISE NOTICE 'Starting table merge...';
 
+    FOR tbl IN 
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+          AND tablename LIKE 'data_202%'
+        ORDER BY tablename
+    LOOP
+        RAISE NOTICE 'Inserting data from %', tbl.tablename;
+        EXECUTE format('INSERT INTO customers SELECT * FROM %I', tbl.tablename);
+    END LOOP;
 
-
+    RAISE NOTICE 'Done merging tables.';
+    
     IF NOT customers_created THEN
         RAISE NOTICE 'No matching tables found to merge!';
     END IF;

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DB_PATH="../subject/customer"
+DB_PATH="/data/subject/customer"
 DB_USR="pnopjira"
 DB_NAME="piscineds"
 DB_HOST="localhost"

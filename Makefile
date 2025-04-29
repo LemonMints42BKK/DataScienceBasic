@@ -15,7 +15,7 @@ up:
 
 # Stop and remove the containers
 down:
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down -v
 
 # Restart the services
 restart:
@@ -28,3 +28,5 @@ ps:
 # Clean up unused containers, volumes, and networks
 prune:
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down --volumes --remove-orphans
+
+.PONY: build up down restart ps prune

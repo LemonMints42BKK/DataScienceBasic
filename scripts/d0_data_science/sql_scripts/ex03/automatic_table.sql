@@ -14,6 +14,7 @@ BEGIN
     ) AS files
     WHERE RIGHT(filename, 4) = '.csv'
   LOOP
+  	RAISE NOTICE 'Imported CSV: %', file.filename;
     --prepare table name without .csv extention
     table_name := regexp_replace(file.filename, '\.csv$', '', 'i');
     --set file path

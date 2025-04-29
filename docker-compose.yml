@@ -40,8 +40,8 @@ services:
       - ./notebooks:/home/jovyan/work
     environment:
       - JUPYTER_ENABLE_LAB=yes
-      - JUPYTER_TOKEN=    # empty disables token
-      - JUPYTER_PASSWORD=mysecretpassword
+      - JUPYTER_TOKEN=mysecretpassword
+
     command: start-notebook.sh
 
 volumes:

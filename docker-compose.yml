@@ -30,10 +30,25 @@ services:
     networks:
       - internal
 
+  jupyter:
+    build: .
+    ports:
+      - "8888:8888"
+    networks:
+      - internal
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=    # empty disables token
+      - JUPYTER_PASSWORD=mysecretpassword
+    command: start-notebook.sh
+
 volumes:
   scripts:
   subject:
   postgres-data:
+  notebook:
 
 networks:
   internal:

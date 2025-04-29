@@ -4,9 +4,6 @@
 DOCKER_COMPOSE = docker-compose
 COMPOSE_FILE = docker-compose.yml
 
-# Services
-APP_SERVICE = your_app_service
-DB_SERVICE = your_db_service
 
 # Build the services defined in docker-compose.yml
 build:
